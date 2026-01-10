@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-k8s-service      # A stable service name (DNS address)
+spec:
+  type: NodePort            # Makes your app accessible outside the cluster
+  selector:
+    app: go-k8s-app         # Match Pods with this label
+  ports:
+    - port: 80            # Service port (cluster-wide port)
+      targetPort: 8080      # Pod container port
+      nodePort: 30080       # Port on each Kubernetes node
