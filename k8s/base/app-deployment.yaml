@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: micro-app-boilerplate-go
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: micro-app-boilerplate-go
+  template:
+    metadata:
+      labels:
+        app: micro-app-boilerplate-go
+    spec:
+      containers:
+        - name: micro-app-boilerplate-go
+          image: micro-app-boilerplate-go:dev
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: local-data
+              mountPath: /app/boilerplate-go
+          workingDir: /app/boilerplate-go
+          command: ["go"]
+          args: ["run", "cmd/main.go", "http-server"]
+      volumes:
+        - name: local-data
+          hostPath:
+            path: /app/boilerplate-go
+            type: Directory
