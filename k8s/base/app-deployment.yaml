@@ -23,7 +23,7 @@ spec:
               mountPath: /app/boilerplate-go
           workingDir: /app/boilerplate-go
           command: ["go"]
-          args: ["run", "cmd/main.go"]
+          args: ["run", "cmd/main.go", "http-server"]
       volumes:
         - name: local-data
           hostPath:

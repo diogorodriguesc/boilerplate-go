@@ -5,8 +5,7 @@ metadata:
 spec:
   type: NodePort            # Makes your app accessible outside the cluster
   selector:
-    app: go-k8s-app         # Match Pods with this label
+    app: micro-app-boilerplate-go         # Match Pods with this label
   ports:
-    - port: 80            # Service port (cluster-wide port)
-      targetPort: 8080      # Pod container port
+    - port: 8080            # Service port (cluster-wide port)
       nodePort: 30080       # Port on each Kubernetes node

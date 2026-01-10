@@ -16,20 +16,27 @@ export MINIKUBE_PROJECTS_PATH=/home/{...}
 ```
 
 Start minikube docker container:
+
+First time: 
 ```bash
 minikube start --driver=kvm2 \
   --mount \
   --mount-string="$MINIKUBE_PROJECTS_PATH:/app"
 ```
 
+Onwards: 
+```bash
+minikube start
+```
+
 Create docker image:
 ```bash
-docker build -t micro-api-boilerplate-go:dev -f Dockerfile.dev .
+docker build -t micro-app-boilerplate-go:dev -f Dockerfile.dev .
 ```
 
 Load created docker image into minikube
 ```bash
-minikube image load micro-api-boilerplate-go:dev
+minikube image load micro-app-boilerplate-go:dev
 ```
 
 Apply Resources:

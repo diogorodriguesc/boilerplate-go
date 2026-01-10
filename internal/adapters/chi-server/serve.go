@@ -15,7 +15,7 @@ import (
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/ports"
 )
 
-const Addr = "0.0.0.0:8081"
+const Addr = "0.0.0.0:8080"
 
 type HttpServer struct {
 	ctx    context.Context
