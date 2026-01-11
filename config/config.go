@@ -25,11 +25,22 @@ func (e Environment) IsValid() bool {
 	return false
 }
 
-type Config struct {
-	AppName  string      `env:"APP_NAME,required"`
-	Env      Environment `env:"ENVIRONMENT,required"`
-	LogLevel int8        `env:"LOG_LEVEL,required"`
-}
+type (
+	Config struct {
+		AppName          string      `env:"APP_NAME,required"`
+		Env              Environment `env:"ENVIRONMENT,required"`
+		LogLevel         int8        `env:"LOG_LEVEL,required"`
+		PostgreSQLConfig PostgreSQLConfig
+	}
+
+	PostgreSQLConfig struct {
+		Host     string `env:"DB_PSQL_HOST,required"`
+		Port     int    `env:"DB_PSQL_PORT,required"`
+		User     string `env:"DB_PSQL_USER,required"`
+		Password string `env:"DB_PSQL_PASSWORD,required"`
+		Database string `env:"DB_PSQL_DATABASE,required"`
+	}
+)
 
 func Load() (*Config, error) {
 	if err := godotenv.Load(); err != nil {
