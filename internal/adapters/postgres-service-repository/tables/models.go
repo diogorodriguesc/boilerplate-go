@@ -4,12 +4,8 @@
 
 package sqlc
 
-import (
-	"database/sql"
-)
-
 type User struct {
-	ID       int64          `json:"id"`
-	Username sql.NullString `json:"username"`
-	Email    sql.NullString `json:"email"`
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }

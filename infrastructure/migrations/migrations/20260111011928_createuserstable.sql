@@ -2,8 +2,8 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS public.users (
     id BIGSERIAL PRIMARY KEY,
-    username VARCHAR(255),
-    email VARCHAR(255)
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL
 );
 -- +goose StatementEnd
 

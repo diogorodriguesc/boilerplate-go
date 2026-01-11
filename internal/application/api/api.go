@@ -32,8 +32,11 @@ func NewApplication(_ context.Context) (ports.ApiPort, func() error, error) {
 	}, func() error { return nil }, nil
 }
 
-func (a *Api) GetUserByEmail(email string) (domain.UserDomain, error) {
-	return domain.UserDomain{
-		Email: email,
-	}, nil
+func (a *Api) GetUserByEmail(email string) (*domain.UserDomain, error) {
+	user, err := a.serviceRepository.GetUserByEmail(context.Background(), email)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

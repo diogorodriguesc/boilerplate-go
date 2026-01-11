@@ -6,6 +6,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/diogorodriguesc/boilerplate-go/cmd/cli/cobra"
+	"github.com/diogorodriguesc/boilerplate-go/cmd/cli/cobra/commands"
 	httpserver "github.com/diogorodriguesc/boilerplate-go/cmd/cli/cobra/http-server"
 	"github.com/diogorodriguesc/boilerplate-go/config"
 )
@@ -19,6 +20,7 @@ func main() {
 	zerolog.SetGlobalLevel(zerolog.Level(cfg.LogLevel))
 
 	rootCmd := cobra.GetRootCmd()
+	rootCmd.AddCommand(commands.RunDBMigrationsCommand())
 	rootCmd.AddCommand(httpserver.ServerHttpCommand())
 
 	if err := rootCmd.Execute(); err != nil {

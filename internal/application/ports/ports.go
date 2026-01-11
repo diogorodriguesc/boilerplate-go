@@ -8,7 +8,7 @@ import (
 
 type (
 	ApiPort interface {
-		GetUserByEmail(email string) (domain.UserDomain, error)
+		GetUserByEmail(email string) (*domain.UserDomain, error)
 	}
 
 	HttpService interface {
