@@ -1,5 +1,7 @@
 package responses
 
 type UserResponse struct {
-	Email string `json:"email"`
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
