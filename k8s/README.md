@@ -8,7 +8,7 @@
 
 ## Setup
 
-From project root directory, execute the following commands
+From the project root directory, execute the following commands
 
 Define MINIKUBE_PROJECTS_PATH:
 ```bash
@@ -19,7 +19,7 @@ Start minikube docker container:
 
 First time: 
 ```bash
-minikube start --driver=kvm2 \
+minikube start --cpus 4 --memory 8192 --driver=kvm2 \
   --mount \
   --mount-string="$MINIKUBE_PROJECTS_PATH:/app"
 ```

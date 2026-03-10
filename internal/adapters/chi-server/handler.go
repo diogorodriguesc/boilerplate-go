@@ -5,9 +5,11 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
+
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/domain/mappers"
 	applicationerrors "github.com/diogorodriguesc/boilerplate-go/internal/application/errors"
-	"github.com/go-chi/render"
 )
 
 func (s *HttpServer) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
@@ -15,8 +17,14 @@ func (s *HttpServer) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-
-	user, err := s.api.GetUserByEmail(r.URL.Query().Get("email"))
+	email := r.URL.Query().Get("email")
+	validate := validator.New()
+	if err := validate.Var(email, "required,email"); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		render.JSON(w, r, mappers.MapErrorIntoErrorResponse(err))
+		return
+	}
+	user, err := s.api.GetUserByEmail(email)
 	if err != nil {
 		if errors.Is(err, applicationerrors.ErrRecordNotFound) {
 			w.WriteHeader(http.StatusNotFound)
@@ -26,7 +34,6 @@ func (s *HttpServer) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, mappers.MapErrorIntoErrorResponse(err))
 		return
 	}
-
 	w.WriteHeader(http.StatusFound)
 	render.JSON(w, r, mappers.MapUserDomainIntoUserResponse(user))
 }

@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"database/sql"
-	_ "database/sql"
 	"fmt"
 	"time"
 
@@ -15,7 +14,7 @@ import (
 
 func New(config config.PostgreSQLConfig) (*storage.DB, error) {
 	db, err := sql.Open(
-		"nrpostgres",
+		"postgres",
 		fmt.Sprintf(
 			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 			config.Host,
@@ -34,8 +33,8 @@ func New(config config.PostgreSQLConfig) (*storage.DB, error) {
 	}
 
 	db.SetConnMaxLifetime(10 * time.Minute)
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(10)
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
 
 	log.Info().Msg("Connected to postgres")
 
