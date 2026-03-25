@@ -16,7 +16,7 @@ func New(config config.PostgreSQLConfig) (*storage.DB, error) {
 	db, err := sql.Open(
 		"postgres",
 		fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+			"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 			config.Host,
 			config.Port,
 			config.User,

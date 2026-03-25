@@ -9,7 +9,7 @@ import (
 	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/middlewares"
 )
 
-func (s *HttpServer) setRouter() *chi.Mux {
+func (s *HttpServer) SetRouter() *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {

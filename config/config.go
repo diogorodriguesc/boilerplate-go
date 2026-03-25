@@ -35,7 +35,7 @@ type (
 
 	PostgreSQLConfig struct {
 		Host     string `env:"DB_PSQL_HOST,required"`
-		Port     int    `env:"DB_PSQL_PORT,required"`
+		Port     string `env:"DB_PSQL_PORT,required"`
 		User     string `env:"DB_PSQL_USER,required"`
 		Password string `env:"DB_PSQL_PASSWORD,required"`
 		Database string `env:"DB_PSQL_DATABASE,required"`

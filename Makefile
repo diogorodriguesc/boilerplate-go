@@ -25,6 +25,10 @@ tests/unit-tests: ## Run unit tests
 	@go tool cover -html=coverage.out -o coverage.html
 	@echo "Tests completed successfully!"
 
+tests/functional-test: ## Run functional tests
+	@echo "Running functional tests..."
+	@go test -tags=functional -v ./internal/adapters/chi-server/...
+
 tests/functional-tests: ## Run functional tests
 	@echo "Running functional tests..."
 	@go test -tags=functional -v ./...

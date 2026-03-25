@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/domain"
+	"github.com/go-chi/chi/v5"
 )
 
 type (
@@ -14,6 +15,7 @@ type (
 	HttpService interface {
 		Run() error
 		Shutdown(ctx context.Context) error
+		SetRouter() *chi.Mux
 	}
 
 	ServiceRepository interface {

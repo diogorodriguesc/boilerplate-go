@@ -2,7 +2,10 @@ package httpserver
 
 import (
 	"context"
+	"os"
 
+	"github.com/diogorodriguesc/boilerplate-go/config"
+	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage/postgres"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
@@ -21,7 +24,18 @@ func ServerHttpCommand() *cobra.Command {
 		Short: CommandShort,
 		Run: func(_ *cobra.Command, _ []string) {
 			ctx := context.Background()
-			application, closeDbConnection, err := api.NewApplication(ctx)
+
+			cfg, err := config.Load()
+			if err != nil {
+				os.Exit(1)
+			}
+
+			pSqlConnection, err := postgres.New(cfg.PostgreSQLConfig)
+			if err != nil {
+				os.Exit(1)
+			}
+
+			application, closeDbConnection, err := api.NewApplication(ctx, pSqlConnection)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to initialize application")
 			}
