@@ -1,7 +1,9 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -12,7 +14,7 @@ import (
 	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage"
 )
 
-func New(config config.PostgreSQLConfig) (*storage.DB, error) {
+func New(ctx context.Context, environment config.Environment, config config.PostgreSQLConfig) (*storage.DB, error) {
 	db, err := sql.Open(
 		"postgres",
 		fmt.Sprintf(
@@ -36,7 +38,22 @@ func New(config config.PostgreSQLConfig) (*storage.DB, error) {
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(25)
 
-	log.Info().Msg("Connected to postgres")
+	schema := "public"
+	if environment.IsTesting() {
+		schema = "testing"
+	}
+
+	_, err = db.Exec("CREATE SCHEMA IF NOT EXISTS " + schema)
+	if err != nil {
+		return nil, errors.New("could not create schema")
+	}
+
+	_, err = db.Exec("SET search_path TO " + schema)
+	if err != nil {
+		return nil, errors.New("could not set schema")
+	}
+
+	log.Ctx(ctx).Info().Msg("Connected to postgres")
 
 	return &storage.DB{DB: db}, nil
 }

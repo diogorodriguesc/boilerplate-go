@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"io/fs"
 
-	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage"
 	"github.com/pressly/goose/v3"
+
+	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage"
 )
 
 const (

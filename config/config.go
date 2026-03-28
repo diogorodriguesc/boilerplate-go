@@ -25,6 +25,10 @@ func (e Environment) IsValid() bool {
 	return false
 }
 
+func (e Environment) IsTesting() bool {
+	return e == Testing
+}
+
 type (
 	Config struct {
 		AppName          string      `env:"APP_NAME,required"`

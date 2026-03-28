@@ -22,7 +22,7 @@ func RunDBMigrationsCommand() *cobra.Command {
 				log.Fatalf("failed to load config: %v", err)
 			}
 
-			pSqlConnection, err := postgres.New(cfg.PostgreSQLConfig)
+			pSqlConnection, err := postgres.New(ctx, cfg.Env, cfg.PostgreSQLConfig)
 			if err != nil {
 				log.Fatalf("failed to connect to postgres: %v", err)
 			}

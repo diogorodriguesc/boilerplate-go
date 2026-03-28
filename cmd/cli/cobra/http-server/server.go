@@ -4,11 +4,11 @@ import (
 	"context"
 	"os"
 
-	"github.com/diogorodriguesc/boilerplate-go/config"
-	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage/postgres"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
+	"github.com/diogorodriguesc/boilerplate-go/config"
+	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage/postgres"
 	chiserver "github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/api"
 )
@@ -30,7 +30,7 @@ func ServerHttpCommand() *cobra.Command {
 				os.Exit(1)
 			}
 
-			pSqlConnection, err := postgres.New(cfg.PostgreSQLConfig)
+			pSqlConnection, err := postgres.New(ctx, cfg.Env, cfg.PostgreSQLConfig)
 			if err != nil {
 				os.Exit(1)
 			}

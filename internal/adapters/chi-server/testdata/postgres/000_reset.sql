@@ -1,1 +1,1 @@
-TRUNCATE users;
+TRUNCATE testing.users;
