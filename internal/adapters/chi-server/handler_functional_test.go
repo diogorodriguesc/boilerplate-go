@@ -91,7 +91,7 @@ func startPostgresContainer(ctx context.Context) (testcontainers.Container, *mig
 		ExposedPorts: []string{"5432/tcp"},
 		Env: map[string]string{
 			"POSTGRES_USER":     "postgres",
-			"POSTGRES_PASSWORD": "postgres", // ggignore
+			"POSTGRES_PASSWORD": "postgres",
 			"POSTGRES_DB":       "postgres",
 		},
 		WaitingFor: wait.ForLog("database system is ready to accept connections").
