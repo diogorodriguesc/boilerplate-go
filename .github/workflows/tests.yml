@@ -12,7 +12,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.25'
 
       - name: Run Unit Tests
         run: make tests/unit-tests
@@ -26,7 +26,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.25'
 
       - name: Run Functional Tests
         run: make tests/functional-tests
