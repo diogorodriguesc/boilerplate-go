@@ -236,5 +236,5 @@ func TestHandler_Functional_GetUserByEmail(t *testing.T) {
 	"id": 1,
 	"username": "foo",
 	"email": "foo@gmail.com"
-}`, recorder.Body.String())
+	}`, recorder.Body.String())
 }
