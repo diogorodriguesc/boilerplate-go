@@ -29,6 +29,13 @@ Onwards:
 minikube start
 ```
 
+Stop Minikube:
+```bash
+minikube stop
+```
+
+## Creating Docker image
+
 Create docker image:
 ```bash
 docker build -t micro-app-boilerplate-go:dev -f Dockerfile.dev .
@@ -38,6 +45,8 @@ Load created docker image into minikube
 ```bash
 minikube image load micro-app-boilerplate-go:dev
 ```
+
+## Applying infrastructure
 
 Apply Resources:
 ```bash
@@ -51,7 +60,9 @@ Delete Resources:
 kubectl delete -k k8s/base/
 ```
 
-Stop Minikube:
+## Application DB Migrations
+
+Run database migrations:
 ```bash
-minikube stop
+kubectl exec -i deployment/micro-app-boilerplate-go -- go run ./cmd/main.go run-db-migrations
 ```

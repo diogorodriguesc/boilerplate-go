@@ -1,19 +1,11 @@
 # Boilerplate Golang
 
-## DB Migrations
-
-Run migrations:
-```bash
-kubectl exec -i deployment/micro-app-boilerplate-go -- go run ./cmd/main.go run-db-migrations
-```
-
-## Build Application & Run
+## Commands
 
 ```bash
-make build
-./bin/api http-server
+make help
 ```
 
-```bash
-curl --location 'localhost:8081/v1/users?email=email@domain.com'
-```
+## Build Application & Run on Development Environment
+
+Read [documentation](k8s/README.md)
