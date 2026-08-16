@@ -1,4 +1,9 @@
-.PHONY: help build/docker-dev-image install/dependencies install/tools tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build run
+.PHONY: help build/docker-dev-image install/sqlc generate/sqlc install/dependencies install/tools tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build run
+
+SQLC_VERSION ?= v1.31.1
+
+TOOLS_BIN ?= $(CURDIR)/.bin
+SQLC_BIN ?= $(TOOLS_BIN)/sqlc
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -16,11 +21,28 @@ install/dependencies: ## Download dependencies
 	@go mod tidy
 	@echo "Dependencies downloaded successfully!"
 
-install/tools: ## Install required tools (goose, sqlc)
+install/sqlc: ## Install sqlc
+	@echo "Installing sqlc..."
+	@set -e; \
+	current=""; \
+	if [ -x "$(SQLC_BIN)" ]; then \
+		current="$$( $(SQLC_BIN) version 2>/dev/null || true )"; \
+	fi; \
+	if [ "$$current" != "$(SQLC_VERSION)" ]; then \
+		echo "Installing sqlc $(SQLC_VERSION)..."; \
+		mkdir -p $(TOOLS_BIN); \
+		GOBIN="$(TOOLS_BIN)" go install github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION); \
+		echo "sqlc $(SQLC_VERSION) installed successfully!"; \
+	fi
+
+generate/sqlc: install/sqlc ## Generate code using sqlc
+	@echo "Generating code using sqlc..."
+	@$(SQLC_BIN) generate
+	@echo "Code generated successfully!"
+
+install/tools: ## Install required tools (goose)
 	@echo "Installing goose..."
 	@go install github.com/pressly/goose/v3/cmd/goose@latest
-	@echo "Installing sqlc..."
-	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	@echo "Tools installed successfully!"
 
 tests/unit-tests: ## Run unit tests
@@ -28,10 +50,6 @@ tests/unit-tests: ## Run unit tests
 	@go test -v -race -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out -o coverage.html
 	@echo "Tests completed successfully!"
-
-tests/functional-test: ## Run functional tests
-	@echo "Running functional tests..."
-	@go test -tags=functional -v ./internal/adapters/chi-server/... -count=1
 
 tests/functional-tests: ## Run functional tests
 	@echo "Running functional tests..."
@@ -51,9 +69,5 @@ build: ## Build the application
 	@echo "Building application..."
 	@go build -o bin/api cmd/main.go
 	@echo "Build completed successfully!"
-
-run: ## Run the application
-	@echo "Running application..."
-	@go run cmd/main.go http-server
 
 .DEFAULT_GOAL := help
