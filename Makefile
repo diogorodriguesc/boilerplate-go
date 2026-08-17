@@ -1,9 +1,11 @@
-.PHONY: help build/docker-dev-image install/sqlc generate/sqlc install/dependencies install/tools tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build run
+.PHONY: help build/docker-dev-image install/sqlc generate/sqlc install/dependencies install/tools tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build
 
 SQLC_VERSION ?= v1.31.1
+SWAGGER_VERSION ?= v1.16.6
 
 TOOLS_BIN ?= $(CURDIR)/.bin
 SQLC_BIN ?= $(TOOLS_BIN)/sqlc
+SWAGGER_BIN ?= $(TOOLS_BIN)/swag
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -35,10 +37,24 @@ install/sqlc: ## Install sqlc
 		echo "sqlc $(SQLC_VERSION) installed successfully!"; \
 	fi
 
+install/swagger:
+	@set -e; \
+	if [ ! -x "$(SWAGGER_BIN)" ] || ! "$(SWAGGER_BIN)" version 2>/dev/null | grep -q "$(SWAGGER_VERSION)"; then \
+		echo "Installing swagger $(SWAGGER_VERSION)..."; \
+		mkdir -p $(TOOLS_BIN); \
+		GOBIN="$(TOOLS_BIN)" go install github.com/swaggo/swag/cmd/swag@$(SWAGGER_VERSION); \
+		echo "swagger $(SWAGGER_VERSION) installed successfully!"; \
+	fi
+
 generate/sqlc: install/sqlc ## Generate code using sqlc
 	@echo "Generating code using sqlc..."
 	@$(SQLC_BIN) generate
 	@echo "Code generated successfully!"
+
+generate/swagger: ## Generate Swagger documentation
+	@echo "Generating Swagger documentation..."
+	@$(SWAGGER_BIN) init -g internal/adapters/chi-server/router.go -o docs
+	@echo "Swagger documentation generated successfully!"
 
 install/tools: ## Install required tools (goose)
 	@echo "Installing goose..."
