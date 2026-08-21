@@ -5,7 +5,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 
+	_ "github.com/diogorodriguesc/boilerplate-go/docs"
+	usersHandler "github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/handlers/users"
 	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/middlewares"
 )
 
@@ -21,11 +24,13 @@ func (s *HttpServer) SetRouter() *chi.Mux {
 		w.Write([]byte("ok"))
 	})
 
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
+
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.Logger)
 		r.Use(middlewares.SetJSONResponseMiddleware())
 
-		r.Get("/v1/users", s.GetUserByEmail)
+		r.Get("/v1/users", usersHandler.GetUserByEmail(s.api))
 	})
 
 	return r
