@@ -10,6 +10,7 @@ import (
 type (
 	ApiPort interface {
 		GetUserByEmail(email string) (*domain.UserDomain, error)
+		CreateUser(username, email string) (*domain.UserDomain, error)
 	}
 
 	HttpService interface {
@@ -20,5 +21,6 @@ type (
 
 	ServiceRepository interface {
 		GetUserByEmail(ctx context.Context, email string) (*domain.UserDomain, error)
+		CreateUser(ctx context.Context, username, email string) (*domain.UserDomain, error)
 	}
 )

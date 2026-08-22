@@ -1,5 +1,18 @@
-basePath: /api/v1
+basePath: /
 definitions:
+  requests.CreateUserRequest:
+    properties:
+      email:
+        maxLength: 255
+        type: string
+      username:
+        maxLength: 255
+        minLength: 3
+        type: string
+    required:
+    - email
+    - username
+    type: object
   responses.ErrorDetail:
     properties:
       message:
@@ -57,6 +70,39 @@ paths:
           schema:
             $ref: '#/definitions/responses.ErrorResponse'
       summary: Get user by email
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user
+      parameters:
+      - description: User to create
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/responses.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Create a user
       tags:
       - users
 swagger: "2.0"

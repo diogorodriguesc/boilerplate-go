@@ -16,7 +16,7 @@ import (
 // @version         1.0
 // @description     This is a sample Go REST API with Swagger documentation.
 // @host            localhost:8080
-// @BasePath        /api/v1
+// @BasePath        /
 func (s *HttpServer) SetRouter() *chi.Mux {
 	r := chi.NewRouter()
 
@@ -30,7 +30,9 @@ func (s *HttpServer) SetRouter() *chi.Mux {
 		r.Use(middleware.Logger)
 		r.Use(middlewares.SetJSONResponseMiddleware())
 
+		// Users resources
 		r.Get("/v1/users", usersHandler.GetUserByEmail(s.api))
+		r.Post("/v1/users", usersHandler.CreateUser(s.api))
 	})
 
 	return r

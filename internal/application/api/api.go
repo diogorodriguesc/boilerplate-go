@@ -28,3 +28,12 @@ func (a *Api) GetUserByEmail(email string) (*domain.UserDomain, error) {
 
 	return user, nil
 }
+
+func (a *Api) CreateUser(username, email string) (*domain.UserDomain, error) {
+	user, err := a.serviceRepository.CreateUser(context.Background(), username, email)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
