@@ -34,7 +34,7 @@ func NewHttpServer(ctx context.Context, api ports.ApiPort) ports.HttpService {
 func (s *HttpServer) Run() error {
 	s.server = &http.Server{
 		Addr:              Addr,
-		Handler:           s.setRouter(),
+		Handler:           s.SetRouter(),
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       60 * time.Second,

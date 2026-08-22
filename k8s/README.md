@@ -8,7 +8,7 @@
 
 ## Setup
 
-From project root directory, execute the following commands
+From the project root directory, execute the following commands
 
 Define MINIKUBE_PROJECTS_PATH:
 ```bash
@@ -19,7 +19,7 @@ Start minikube docker container:
 
 First time: 
 ```bash
-minikube start --driver=kvm2 \
+minikube start --cpus 4 --memory 8192 --driver=kvm2 \
   --mount \
   --mount-string="$MINIKUBE_PROJECTS_PATH:/app"
 ```
@@ -28,6 +28,13 @@ Onwards:
 ```bash
 minikube start
 ```
+
+Stop Minikube:
+```bash
+minikube stop
+```
+
+## Creating Docker image
 
 Create docker image:
 ```bash
@@ -38,6 +45,8 @@ Load created docker image into minikube
 ```bash
 minikube image load micro-app-boilerplate-go:dev
 ```
+
+## Applying infrastructure
 
 Apply Resources:
 ```bash
@@ -51,7 +60,9 @@ Delete Resources:
 kubectl delete -k k8s/base/
 ```
 
-Stop Minikube:
+## Application DB Migrations
+
+Run database migrations:
 ```bash
-minikube stop
+kubectl exec -i deployment/micro-app-boilerplate-go -- go run ./cmd/main.go run-db-migrations
 ```

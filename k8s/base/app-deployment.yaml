@@ -12,22 +12,40 @@ spec:
       labels:
         app: micro-app-boilerplate-go
     spec:
-      initContainers:
-        - name: run-migrations
-          image: micro-app-boilerplate-go:dev
-          imagePullPolicy: Never
-          workingDir: /app/boilerplate-go
-          command: [ "go" ]
-          args: [ "run", "cmd/main.go", "run-db-migrations" ]
-          volumeMounts:
-            - name: local-data
-              mountPath: /app/boilerplate-go
+      # initContainers: # For running database migrations before starting the main application
+        # - name: run-migrations
+        #  image: micro-app-boilerplate-go:dev
+        #  imagePullPolicy: Never
+        #  workingDir: /app/boilerplate-go
+        #  command: [ "go" ]
+        #  args: [ "run", "cmd/main.go", "run-db-migrations" ]
+        #  volumeMounts:
+        #    - name: local-data
+        #      mountPath: /app/boilerplate-go
       containers:
         - name: micro-app-boilerplate-go
           image: micro-app-boilerplate-go:dev
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 3
           volumeMounts:
             - name: local-data
               mountPath: /app/boilerplate-go

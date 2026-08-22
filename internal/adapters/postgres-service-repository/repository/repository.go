@@ -5,12 +5,16 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/lib/pq"
+
 	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage"
 	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/postgres-service-repository/tables"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/domain"
 	applicationerrors "github.com/diogorodriguesc/boilerplate-go/internal/application/errors"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/ports"
 )
+
+const pqUniqueViolationCode = "23505"
 
 type ServiceRepository struct {
 	DB      *storage.DB
@@ -29,6 +33,26 @@ func (s *ServiceRepository) GetUserByEmail(ctx context.Context, email string) (*
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, applicationerrors.ErrRecordNotFound
+		}
+		return nil, err
+	}
+
+	return &domain.UserDomain{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+	}, nil
+}
+
+func (s *ServiceRepository) CreateUser(ctx context.Context, username, email string) (*domain.UserDomain, error) {
+	user, err := s.queries.CreateUser(ctx, sqlc.CreateUserParams{
+		Username: username,
+		Email:    email,
+	})
+	if err != nil {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) && pqErr.Code == pqUniqueViolationCode {
+			return nil, applicationerrors.ErrDuplicateEntry
 		}
 		return nil, err
 	}

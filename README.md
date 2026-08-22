@@ -1,12 +1,11 @@
 # Boilerplate Golang
 
-## Build Application & Run
+## Commands
 
 ```bash
-make build
-./bin/api http-server
+make help
 ```
 
-```bash
-curl --location 'localhost:8081/v1/users?email=email@domain.com'
-```
+## Build Application & Run on Development Environment
+
+Read [documentation](k8s/README.md)

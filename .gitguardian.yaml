@@ -1,0 +1,4 @@
+version: 2
+gitguardian:
+  ignore-paths:
+    - '**/*_test.go'             # Ignore all files in test folders
