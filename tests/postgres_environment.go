@@ -5,7 +5,9 @@ package tests
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -21,7 +23,11 @@ import (
 	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage/postgres"
 )
 
-const postgresDockerImage = "postgres:16-alpine"
+const (
+	postgresDockerImage = "postgres:16-alpine"
+	postgresUser        = "postgres"
+	postgresDatabase    = "postgres"
+)
 
 // PostgresEnvironment is a running Postgres testcontainer together with the
 // application storage connected to it.
@@ -35,13 +41,18 @@ type PostgresEnvironment struct {
 // StartPostgresEnvironment starts a Postgres container, connects the
 // application storage to it and runs all pending migrations.
 func StartPostgresEnvironment(ctx context.Context) (*PostgresEnvironment, error) {
+	password, err := randomPassword()
+	if err != nil {
+		return nil, err
+	}
+
 	req := testcontainers.ContainerRequest{
 		Image:        postgresDockerImage,
 		ExposedPorts: []string{"5432/tcp"},
 		Env: map[string]string{
-			"POSTGRES_USER":     "postgres",
-			"POSTGRES_PASSWORD": "postgres",
-			"POSTGRES_DB":       "postgres",
+			"POSTGRES_USER":     postgresUser,
+			"POSTGRES_PASSWORD": password,
+			"POSTGRES_DB":       postgresDatabase,
 		},
 		WaitingFor: wait.ForLog("database system is ready to accept connections").
 			WithOccurrence(1).
@@ -64,7 +75,7 @@ func StartPostgresEnvironment(ctx context.Context) (*PostgresEnvironment, error)
 		return nil, err
 	}
 
-	env.rawDB, err = openDB(host, port)
+	env.rawDB, err = openDB(host, port, password)
 	if err != nil {
 		env.Close()
 		return nil, err
@@ -81,9 +92,9 @@ func StartPostgresEnvironment(ctx context.Context) (*PostgresEnvironment, error)
 		config.PostgreSQLConfig{
 			Host:     host,
 			Port:     port,
-			User:     "postgres",
-			Password: "postgres",
-			Database: "postgres",
+			User:     postgresUser,
+			Password: password,
+			Database: postgresDatabase,
 		},
 	)
 	if err != nil {
@@ -159,14 +170,24 @@ func containerAddress(ctx context.Context, container testcontainers.Container) (
 	return host, port.Port(), nil
 }
 
-func openDB(host, port string) (*sql.DB, error) {
+func openDB(host, port, password string) (*sql.DB, error) {
 	return sql.Open(
 		"postgres",
 		fmt.Sprintf(
 			"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-			host, port, "postgres", "postgres", "postgres",
+			host, port, postgresUser, password, postgresDatabase,
 		),
 	)
+}
+
+// randomPassword generates a fresh credential for the ephemeral test
+// container, so no fixed password ever needs to live in source control.
+func randomPassword() (string, error) {
+	buf := make([]byte, 16)
+	if _, err := rand.Read(buf); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(buf), nil
 }
 
 func waitForPing(ctx context.Context, db *sql.DB) error {
