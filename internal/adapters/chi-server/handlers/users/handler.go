@@ -16,37 +16,39 @@ import (
 
 var validate = validator.New()
 
-// @Summary      Get user by email
-// @Description  Retrieves a user's details by their email address
+// @Summary      Search user
+// @Description  Searches for a user
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        email  query     string  true  "User email address"
-// @Success      302    {object}  responses.UserResponse
+// @Param        user  body      requests.SearchUserRequest  true  "User to search"
+// @Success      200    {array}   responses.UserResponse
 // @Failure      400    {object}  responses.ErrorResponse
-// @Failure      404    {object}  responses.ErrorResponse
 // @Failure      500    {object}  responses.ErrorResponse
-// @Router       /v1/users [get]
-func GetUserByEmail(api ports.ApiPort) http.HandlerFunc {
+// @Router       /v1/users/search [post]
+func SearchUser(api ports.ApiPort) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		email := r.URL.Query().Get("email")
-		if err := validate.Var(email, "required,email"); err != nil {
+		var req requests.SearchUserRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, mappers.MapErrorIntoErrorResponse(err))
 			return
 		}
-		user, err := api.GetUserByEmail(email)
-		if err != nil {
-			if errors.Is(err, applicationerrors.ErrRecordNotFound) {
-				w.WriteHeader(http.StatusNotFound)
-			} else {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
+
+		if err := validate.Struct(req); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, mappers.MapErrorIntoErrorResponse(err))
 			return
 		}
-		w.WriteHeader(http.StatusFound)
-		render.JSON(w, r, mappers.MapUserDomainIntoUserResponse(user))
+
+		users, err := api.SearchUser(ports.SearchUserPayload{Email: req.Email})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			render.JSON(w, r, mappers.MapErrorIntoErrorResponse(err))
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		render.JSON(w, r, mappers.MapUserDomainsIntoUserResponses(users))
 	}
 }
 

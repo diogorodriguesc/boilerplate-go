@@ -20,13 +20,13 @@ func NewApplication(_ context.Context, pSqlConnection *storage.DB) (ports.ApiPor
 	}, func() error { return nil }, nil
 }
 
-func (a *Api) GetUserByEmail(email string) (*domain.UserDomain, error) {
-	user, err := a.serviceRepository.GetUserByEmail(context.Background(), email)
+func (a *Api) SearchUser(payload ports.SearchUserPayload) ([]domain.UserDomain, error) {
+	users, err := a.serviceRepository.SearchUsers(context.Background(), payload)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return users, nil
 }
 
 func (a *Api) CreateUser(username, email string) (*domain.UserDomain, error) {

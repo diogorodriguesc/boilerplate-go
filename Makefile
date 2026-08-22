@@ -1,4 +1,4 @@
-.PHONY: help build/docker-dev-image install/sqlc generate/sqlc install/dependencies install/tools tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build
+.PHONY: help manage/dev-environment install/sqlc generate/sqlc install/dependencies install/tools tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build
 
 SQLC_VERSION ?= v1.31.1
 SWAGGER_VERSION ?= v1.16.6
@@ -13,9 +13,8 @@ help: ## Show this help message
 	@echo 'Available targets:'
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_\/\-]+:.*?## / {printf "  %-30s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-build/docker-dev-image: ## Build the development Docker image
-	@echo "Building development Docker image..."
-	@docker buildx build --load -t micro-app-boilerplate-go:dev -f Dockerfile.dev .
+manage/dev-environment: ## Manage development environment
+	@echo "Go into k8s folder and run make"
 
 install/dependencies: ## Download dependencies
 	@echo "Downloading dependencies..."

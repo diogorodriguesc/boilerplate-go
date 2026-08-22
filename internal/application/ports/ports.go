@@ -8,8 +8,12 @@ import (
 )
 
 type (
+	SearchUserPayload struct {
+		Email string
+	}
+
 	ApiPort interface {
-		GetUserByEmail(email string) (*domain.UserDomain, error)
+		SearchUser(payload SearchUserPayload) ([]domain.UserDomain, error)
 		CreateUser(username, email string) (*domain.UserDomain, error)
 	}
 
@@ -20,7 +24,7 @@ type (
 	}
 
 	ServiceRepository interface {
-		GetUserByEmail(ctx context.Context, email string) (*domain.UserDomain, error)
+		SearchUsers(ctx context.Context, filters SearchUserPayload) ([]domain.UserDomain, error)
 		CreateUser(ctx context.Context, username, email string) (*domain.UserDomain, error)
 	}
 )

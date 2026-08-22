@@ -28,20 +28,24 @@ func NewServiceRepository(db *storage.DB, queries *sqlc.Queries) ports.ServiceRe
 	}
 }
 
-func (s *ServiceRepository) GetUserByEmail(ctx context.Context, email string) (*domain.UserDomain, error) {
-	user, err := s.queries.GetUserByEmail(ctx, email)
+func (s *ServiceRepository) SearchUsers(ctx context.Context, filters ports.SearchUserPayload) ([]domain.UserDomain, error) {
+	email := sql.NullString{String: filters.Email, Valid: filters.Email != ""}
+
+	users, err := s.queries.SearchUsers(ctx, email)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, applicationerrors.ErrRecordNotFound
-		}
 		return nil, err
 	}
 
-	return &domain.UserDomain{
-		ID:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-	}, nil
+	results := make([]domain.UserDomain, 0, len(users))
+	for _, user := range users {
+		results = append(results, domain.UserDomain{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		})
+	}
+
+	return results, nil
 }
 
 func (s *ServiceRepository) CreateUser(ctx context.Context, username, email string) (*domain.UserDomain, error) {
