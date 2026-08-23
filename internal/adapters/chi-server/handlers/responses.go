@@ -1,4 +1,4 @@
-package responses
+package handlers
 
 type ErrorResponse struct {
 	Error ErrorDetail `json:"error"`

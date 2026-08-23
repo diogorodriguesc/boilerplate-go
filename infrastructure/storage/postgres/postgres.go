@@ -43,17 +43,21 @@ func New(ctx context.Context, environment config.Environment, config config.Post
 		schema = "testing"
 	}
 
+	log.Ctx(ctx).Info().Str("schema", schema).Msg("Creating schema if not exists")
+
 	_, err = db.Exec("CREATE SCHEMA IF NOT EXISTS " + schema)
 	if err != nil {
 		return nil, errors.New("could not create schema")
 	}
+
+	log.Ctx(ctx).Info().Str("schema", schema).Msg("Schema created or already exists")
 
 	_, err = db.Exec("SET search_path TO " + schema)
 	if err != nil {
 		return nil, errors.New("could not set schema")
 	}
 
-	log.Ctx(ctx).Info().Msg("Connected to postgres")
+	log.Ctx(ctx).Info().Str("schema", schema).Msg("Connected to postgres")
 
 	return &storage.DB{DB: db}, nil
 }

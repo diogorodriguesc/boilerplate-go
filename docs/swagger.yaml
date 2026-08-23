@@ -1,5 +1,15 @@
 basePath: /
 definitions:
+  handlers.ErrorDetail:
+    properties:
+      message:
+        type: string
+    type: object
+  handlers.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/handlers.ErrorDetail'
+    type: object
   requests.CreateUserRequest:
     properties:
       email:
@@ -13,15 +23,15 @@ definitions:
     - email
     - username
     type: object
-  responses.ErrorDetail:
+  requests.SearchUserRequest:
     properties:
-      message:
+      email:
+        maxLength: 255
         type: string
-    type: object
-  responses.ErrorResponse:
-    properties:
-      error:
-        $ref: '#/definitions/responses.ErrorDetail'
+      username:
+        maxLength: 255
+        minLength: 3
+        type: string
     type: object
   responses.UserResponse:
     properties:
@@ -36,42 +46,10 @@ host: localhost:8080
 info:
   contact: {}
   description: This is a sample Go REST API with Swagger documentation.
-  title: My Go API
+  title: Golang REST API Boilerplate
   version: "1.0"
 paths:
   /v1/users:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a user's details by their email address
-      parameters:
-      - description: User email address
-        in: query
-        name: email
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "302":
-          description: Found
-          schema:
-            $ref: '#/definitions/responses.UserResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/responses.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/responses.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/responses.ErrorResponse'
-      summary: Get user by email
-      tags:
-      - users
     post:
       consumes:
       - application/json
@@ -93,16 +71,48 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/handlers.ErrorResponse'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/responses.ErrorResponse'
+            $ref: '#/definitions/handlers.ErrorResponse'
       summary: Create a user
+      tags:
+      - users
+  /v1/users/search:
+    post:
+      consumes:
+      - application/json
+      description: Searches for users
+      parameters:
+      - description: User to search
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/requests.SearchUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/responses.UserResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Search users
       tags:
       - users
 swagger: "2.0"

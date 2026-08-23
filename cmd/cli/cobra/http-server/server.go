@@ -24,6 +24,7 @@ func ServerHttpCommand() *cobra.Command {
 		Short: CommandShort,
 		Run: func(_ *cobra.Command, _ []string) {
 			ctx := context.Background()
+			ctx = log.Logger.WithContext(ctx)
 
 			cfg, err := config.Load()
 			if err != nil {

@@ -8,7 +8,7 @@ import (
 	"github.com/lib/pq"
 
 	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage"
-	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/postgres-service-repository/tables"
+	sqlc "github.com/diogorodriguesc/boilerplate-go/internal/adapters/postgres-service-repository/tables"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/domain"
 	applicationerrors "github.com/diogorodriguesc/boilerplate-go/internal/application/errors"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/ports"
@@ -28,20 +28,25 @@ func NewServiceRepository(db *storage.DB, queries *sqlc.Queries) ports.ServiceRe
 	}
 }
 
-func (s *ServiceRepository) GetUserByEmail(ctx context.Context, email string) (*domain.UserDomain, error) {
-	user, err := s.queries.GetUserByEmail(ctx, email)
+func (s *ServiceRepository) SearchUsers(ctx context.Context, filters ports.SearchUserPayload) ([]domain.UserDomain, error) {
+	users, err := s.queries.SearchUsers(ctx, sqlc.SearchUsersParams{
+		Email:    sql.NullString{String: filters.Email, Valid: filters.Email != ""},
+		Username: sql.NullString{String: filters.Username, Valid: filters.Username != ""},
+	})
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, applicationerrors.ErrRecordNotFound
-		}
 		return nil, err
 	}
 
-	return &domain.UserDomain{
-		ID:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-	}, nil
+	results := make([]domain.UserDomain, 0, len(users))
+	for _, user := range users {
+		results = append(results, domain.UserDomain{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		})
+	}
+
+	return results, nil
 }
 
 func (s *ServiceRepository) CreateUser(ctx context.Context, username, email string) (*domain.UserDomain, error) {

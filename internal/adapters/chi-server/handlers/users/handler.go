@@ -8,45 +8,51 @@ import (
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
 
+	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/handlers"
 	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/handlers/users/requests"
-	"github.com/diogorodriguesc/boilerplate-go/internal/application/domain/mappers"
+	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/handlers/users/responses"
 	applicationerrors "github.com/diogorodriguesc/boilerplate-go/internal/application/errors"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/ports"
 )
 
 var validate = validator.New()
 
-// @Summary      Get user by email
-// @Description  Retrieves a user's details by their email address
+// @Summary      Search users
+// @Description  Searches for users
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Param        email  query     string  true  "User email address"
-// @Success      302    {object}  responses.UserResponse
-// @Failure      400    {object}  responses.ErrorResponse
-// @Failure      404    {object}  responses.ErrorResponse
-// @Failure      500    {object}  responses.ErrorResponse
-// @Router       /v1/users [get]
-func GetUserByEmail(api ports.ApiPort) http.HandlerFunc {
+// @Param        user  body      requests.SearchUserRequest  true  "User to search"
+// @Success      200    {array}   responses.UserResponse
+// @Failure      400    {object}  handlers.ErrorResponse
+// @Failure      500    {object}  handlers.ErrorResponse
+// @Router       /v1/users/search [post]
+func SearchUsers(api ports.ApiPort) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		email := r.URL.Query().Get("email")
-		if err := validate.Var(email, "required,email"); err != nil {
+		var req requests.SearchUserRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, mappers.MapErrorIntoErrorResponse(err))
+			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
 			return
 		}
-		user, err := api.GetUserByEmail(email)
+
+		if err := validate.Struct(req); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
+			return
+		}
+
+		users, err := api.SearchUsers(ports.SearchUserPayload{
+			Username: req.Username,
+			Email:    req.Email,
+		})
 		if err != nil {
-			if errors.Is(err, applicationerrors.ErrRecordNotFound) {
-				w.WriteHeader(http.StatusNotFound)
-			} else {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			render.JSON(w, r, mappers.MapErrorIntoErrorResponse(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
 			return
 		}
-		w.WriteHeader(http.StatusFound)
-		render.JSON(w, r, mappers.MapUserDomainIntoUserResponse(user))
+		w.WriteHeader(http.StatusOK)
+		render.JSON(w, r, responses.UserDomainCollectionToUserResponseCollection(users))
 	}
 }
 
@@ -57,22 +63,22 @@ func GetUserByEmail(api ports.ApiPort) http.HandlerFunc {
 // @Produce      json
 // @Param        user  body      requests.CreateUserRequest  true  "User to create"
 // @Success      201   {object}  responses.UserResponse
-// @Failure      400   {object}  responses.ErrorResponse
-// @Failure      409   {object}  responses.ErrorResponse
-// @Failure      500   {object}  responses.ErrorResponse
+// @Failure      400   {object}  handlers.ErrorResponse
+// @Failure      409   {object}  handlers.ErrorResponse
+// @Failure      500   {object}  handlers.ErrorResponse
 // @Router       /v1/users [post]
 func CreateUser(api ports.ApiPort) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req requests.CreateUserRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, mappers.MapErrorIntoErrorResponse(err))
+			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
 			return
 		}
 
 		if err := validate.Struct(req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			render.JSON(w, r, mappers.MapErrorIntoErrorResponse(err))
+			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
 			return
 		}
 
@@ -83,11 +89,11 @@ func CreateUser(api ports.ApiPort) http.HandlerFunc {
 			} else {
 				w.WriteHeader(http.StatusInternalServerError)
 			}
-			render.JSON(w, r, mappers.MapErrorIntoErrorResponse(err))
+			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
 			return
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		render.JSON(w, r, mappers.MapUserDomainIntoUserResponse(user))
+		render.JSON(w, r, responses.UserDomainToUserResponse(user))
 	}
 }

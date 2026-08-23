@@ -48,7 +48,8 @@ func fixtureAbsPath(relative string) string {
 func performRequest(t *testing.T, email string) *httptest.ResponseRecorder {
 	t.Helper()
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/users?email=%s", email), nil)
+	body := fmt.Sprintf(`{"email": %q}`, email)
+	req := httptest.NewRequest(http.MethodPost, "/v1/users/search", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	application, _, err := api.NewApplication(t.Context(), env.Storage)
@@ -81,15 +82,22 @@ func performCreateUserRequest(t *testing.T, body string) *httptest.ResponseRecor
 	return recorder
 }
 
-func TestHandler_Functional_GetUserByEmail(t *testing.T) {
+func TestHandler_Functional_SearchUser(t *testing.T) {
 	seedUsers(t)
 	recorder := performRequest(t, "foo@gmail.com")
-	require.Equal(t, recorder.Code, http.StatusFound)
-	require.JSONEq(t, `{
+	require.Equal(t, http.StatusOK, recorder.Code)
+	require.JSONEq(t, `[{
 	"id": 1,
 	"username": "foo",
 	"email": "foo@gmail.com"
-	}`, recorder.Body.String())
+	}]`, recorder.Body.String())
+}
+
+func TestHandler_Functional_SearchUser_NoMatch(t *testing.T) {
+	seedUsers(t)
+	recorder := performRequest(t, "missing@gmail.com")
+	require.Equal(t, http.StatusOK, recorder.Code)
+	require.JSONEq(t, `[]`, recorder.Body.String())
 }
 
 func TestHandler_Functional_CreateUser(t *testing.T) {

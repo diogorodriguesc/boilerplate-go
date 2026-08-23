@@ -1,5 +1,9 @@
 # Boilerplate Golang
 
+## Architectural Pattern
+
+- Hexagonal Architecture
+
 ## Commands
 
 ```bash

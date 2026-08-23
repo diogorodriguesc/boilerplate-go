@@ -16,54 +16,6 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/v1/users": {
-            "get": {
-                "description": "Retrieves a user's details by their email address",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get user by email",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User email address",
-                        "name": "email",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "302": {
-                        "description": "Found",
-                        "schema": {
-                            "$ref": "#/definitions/responses.UserResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Creates a new user",
                 "consumes": [
@@ -97,19 +49,68 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/users/search": {
+            "post": {
+                "description": "Searches for users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Search users",
+                "parameters": [
+                    {
+                        "description": "User to search",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.SearchUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/responses.UserResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -117,6 +118,22 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.ErrorDetail": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/handlers.ErrorDetail"
+                }
+            }
+        },
         "requests.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -135,19 +152,17 @@ const docTemplate = `{
                 }
             }
         },
-        "responses.ErrorDetail": {
+        "requests.SearchUserRequest": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "responses.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/responses.ErrorDetail"
+                "email": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 3
                 }
             }
         },
@@ -174,7 +189,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "My Go API",
+	Title:            "Golang REST API Boilerplate",
 	Description:      "This is a sample Go REST API with Swagger documentation.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
