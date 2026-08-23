@@ -30,7 +30,7 @@ func New(ctx context.Context, environment config.Environment, config config.Post
 		return nil, err
 	}
 
-	if err := db.Ping(); err != nil {
+	if err = db.Ping(); err != nil {
 		return nil, err
 	}
 

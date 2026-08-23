@@ -21,7 +21,7 @@ func (s *HttpServer) SetRouter() *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ok"))
+		_, _ = w.Write([]byte("ok"))
 	})
 
 	r.Get("/swagger/*", httpSwagger.WrapHandler)

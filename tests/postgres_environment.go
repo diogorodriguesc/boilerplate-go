@@ -81,7 +81,7 @@ func StartPostgresEnvironment(ctx context.Context) (*PostgresEnvironment, error)
 		return nil, err
 	}
 
-	if err := waitForPing(ctx, env.rawDB); err != nil {
+	if err = waitForPing(ctx, env.rawDB); err != nil {
 		env.Close()
 		return nil, err
 	}
