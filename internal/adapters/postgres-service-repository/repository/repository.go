@@ -8,7 +8,7 @@ import (
 	"github.com/lib/pq"
 
 	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage"
-	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/postgres-service-repository/tables"
+	sqlc "github.com/diogorodriguesc/boilerplate-go/internal/adapters/postgres-service-repository/tables"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/domain"
 	applicationerrors "github.com/diogorodriguesc/boilerplate-go/internal/application/errors"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/ports"
@@ -29,9 +29,10 @@ func NewServiceRepository(db *storage.DB, queries *sqlc.Queries) ports.ServiceRe
 }
 
 func (s *ServiceRepository) SearchUsers(ctx context.Context, filters ports.SearchUserPayload) ([]domain.UserDomain, error) {
-	email := sql.NullString{String: filters.Email, Valid: filters.Email != ""}
-
-	users, err := s.queries.SearchUsers(ctx, email)
+	users, err := s.queries.SearchUsers(ctx, sqlc.SearchUsersParams{
+		Email:    sql.NullString{String: filters.Email, Valid: filters.Email != ""},
+		Username: sql.NullString{String: filters.Username, Valid: filters.Username != ""},
+	})
 	if err != nil {
 		return nil, err
 	}

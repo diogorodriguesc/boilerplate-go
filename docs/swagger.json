@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "This is a sample Go REST API with Swagger documentation.",
-        "title": "My Go API",
+        "title": "Golang REST API Boilerplate",
         "contact": {},
         "version": "1.0"
     },
@@ -43,19 +43,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -63,7 +63,7 @@
         },
         "/v1/users/search": {
             "post": {
-                "description": "Searches for a user",
+                "description": "Searches for users",
                 "consumes": [
                     "application/json"
                 ],
@@ -73,7 +73,7 @@
                 "tags": [
                     "users"
                 ],
-                "summary": "Search user",
+                "summary": "Search users",
                 "parameters": [
                     {
                         "description": "User to search",
@@ -98,13 +98,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -112,6 +112,22 @@
         }
     },
     "definitions": {
+        "handlers.ErrorDetail": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/handlers.ErrorDetail"
+                }
+            }
+        },
         "requests.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -132,29 +148,15 @@
         },
         "requests.SearchUserRequest": {
             "type": "object",
-            "required": [
-                "email"
-            ],
             "properties": {
                 "email": {
                     "type": "string",
                     "maxLength": 255
-                }
-            }
-        },
-        "responses.ErrorDetail": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "responses.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/responses.ErrorDetail"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 3
                 }
             }
         },

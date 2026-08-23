@@ -49,19 +49,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -69,7 +69,7 @@ const docTemplate = `{
         },
         "/v1/users/search": {
             "post": {
-                "description": "Searches for a user",
+                "description": "Searches for users",
                 "consumes": [
                     "application/json"
                 ],
@@ -79,7 +79,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Search user",
+                "summary": "Search users",
                 "parameters": [
                     {
                         "description": "User to search",
@@ -104,13 +104,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/responses.ErrorResponse"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -118,6 +118,22 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.ErrorDetail": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/handlers.ErrorDetail"
+                }
+            }
+        },
         "requests.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -138,29 +154,15 @@ const docTemplate = `{
         },
         "requests.SearchUserRequest": {
             "type": "object",
-            "required": [
-                "email"
-            ],
             "properties": {
                 "email": {
                     "type": "string",
                     "maxLength": 255
-                }
-            }
-        },
-        "responses.ErrorDetail": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "responses.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "$ref": "#/definitions/responses.ErrorDetail"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 3
                 }
             }
         },
@@ -187,7 +189,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "My Go API",
+	Title:            "Golang REST API Boilerplate",
 	Description:      "This is a sample Go REST API with Swagger documentation.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

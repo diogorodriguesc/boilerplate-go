@@ -20,7 +20,7 @@ func NewApplication(_ context.Context, pSqlConnection *storage.DB) (ports.ApiPor
 	}, func() error { return nil }, nil
 }
 
-func (a *Api) SearchUser(payload ports.SearchUserPayload) ([]domain.UserDomain, error) {
+func (a *Api) SearchUsers(payload ports.SearchUserPayload) ([]domain.UserDomain, error) {
 	users, err := a.serviceRepository.SearchUsers(context.Background(), payload)
 	if err != nil {
 		return nil, err

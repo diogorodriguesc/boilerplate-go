@@ -9,11 +9,12 @@ import (
 
 type (
 	SearchUserPayload struct {
-		Email string
+		Username string
+		Email    string
 	}
 
 	ApiPort interface {
-		SearchUser(payload SearchUserPayload) ([]domain.UserDomain, error)
+		SearchUsers(payload SearchUserPayload) ([]domain.UserDomain, error)
 		CreateUser(username, email string) (*domain.UserDomain, error)
 	}
 

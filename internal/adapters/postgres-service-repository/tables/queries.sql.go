@@ -19,27 +19,46 @@ type CreateUserParams struct {
 	Email    string `json:"email"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+type CreateUserRow struct {
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
 	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.Email)
-	var i User
+	var i CreateUserRow
 	err := row.Scan(&i.ID, &i.Username, &i.Email)
 	return i, err
 }
 
 const searchUsers = `-- name: SearchUsers :many
 SELECT id, username, email FROM users
-WHERE ($1::text IS NULL OR email = $1)
+WHERE 
+    ($1::text IS NULL OR email = $1) AND
+    ($2::text IS NULL OR username = $2)
 `
 
-func (q *Queries) SearchUsers(ctx context.Context, email sql.NullString) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, searchUsers, email)
+type SearchUsersParams struct {
+	Email    sql.NullString `json:"email"`
+	Username sql.NullString `json:"username"`
+}
+
+type SearchUsersRow struct {
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+func (q *Queries) SearchUsers(ctx context.Context, arg SearchUsersParams) ([]SearchUsersRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchUsers, arg.Email, arg.Username)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []User{}
+	items := []SearchUsersRow{}
 	for rows.Next() {
-		var i User
+		var i SearchUsersRow
 		if err := rows.Scan(&i.ID, &i.Username, &i.Email); err != nil {
 			return nil, err
 		}

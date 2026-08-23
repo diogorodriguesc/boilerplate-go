@@ -17,17 +17,17 @@ import (
 
 var validate = validator.New()
 
-// @Summary      Search user
-// @Description  Searches for a user
+// @Summary      Search users
+// @Description  Searches for users
 // @Tags         users
 // @Accept       json
 // @Produce      json
 // @Param        user  body      requests.SearchUserRequest  true  "User to search"
 // @Success      200    {array}   responses.UserResponse
-// @Failure      400    {object}  responses.ErrorResponse
-// @Failure      500    {object}  responses.ErrorResponse
+// @Failure      400    {object}  handlers.ErrorResponse
+// @Failure      500    {object}  handlers.ErrorResponse
 // @Router       /v1/users/search [post]
-func SearchUser(api ports.ApiPort) http.HandlerFunc {
+func SearchUsers(api ports.ApiPort) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req requests.SearchUserRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -42,7 +42,10 @@ func SearchUser(api ports.ApiPort) http.HandlerFunc {
 			return
 		}
 
-		users, err := api.SearchUser(ports.SearchUserPayload{Email: req.Email})
+		users, err := api.SearchUsers(ports.SearchUserPayload{
+			Username: req.Username,
+			Email:    req.Email,
+		})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
@@ -60,9 +63,9 @@ func SearchUser(api ports.ApiPort) http.HandlerFunc {
 // @Produce      json
 // @Param        user  body      requests.CreateUserRequest  true  "User to create"
 // @Success      201   {object}  responses.UserResponse
-// @Failure      400   {object}  responses.ErrorResponse
-// @Failure      409   {object}  responses.ErrorResponse
-// @Failure      500   {object}  responses.ErrorResponse
+// @Failure      400   {object}  handlers.ErrorResponse
+// @Failure      409   {object}  handlers.ErrorResponse
+// @Failure      500   {object}  handlers.ErrorResponse
 // @Router       /v1/users [post]
 func CreateUser(api ports.ApiPort) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
