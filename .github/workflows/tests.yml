@@ -3,8 +3,23 @@ name: Test Suite
 on: [push]
 
 jobs:
-  # Job 1: Unit Tests
+  # Job 1: Lint
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.6'
+
+      - name: Run Lint
+        run: make lint
+
+  # Job 2: Unit Tests
   unit-tests:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,8 +32,9 @@ jobs:
       - name: Run Unit Tests
         run: make tests/unit-tests
 
-  # Job 2: Functional Tests
+  # Job 3: Functional Tests
   functional-tests:
+    needs: unit-tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

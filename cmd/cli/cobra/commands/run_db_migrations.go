@@ -28,6 +28,10 @@ func RunDBMigrationsCommand() *cobra.Command {
 			}
 
 			migrator, err := migrations.NewDBMigrator(pSqlConnection)
+			if err != nil {
+				log.Fatalf("failed to create migrator: %v", err)
+			}
+
 			if err := migrator.Migrate(ctx); err != nil {
 				log.Fatalf("failed to run migrations: %v", err)
 			}
