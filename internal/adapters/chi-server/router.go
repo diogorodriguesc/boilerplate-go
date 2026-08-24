@@ -31,6 +31,9 @@ func (s *HttpServer) SetRouter() *chi.Mux {
 		r.Use(middlewares.SetJSONResponseMiddleware())
 
 		// Users resources
+		r.Get("/users/{id}", usersHandler.GetUser(s.api))
+		r.Delete("/users/{id}", usersHandler.DeleteUser(s.api))
+		r.Get("/users", usersHandler.ListUsers(s.api))
 		r.Post("/users/search", usersHandler.SearchUsers(s.api))
 		r.Post("/users", usersHandler.CreateUser(s.api))
 	})

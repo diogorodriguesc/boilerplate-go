@@ -1,13 +1,13 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "internal/adapters/postgres-service-repository/queries.sql"
+    queries: "internal/adapters/postgres-service-repository/users/queries.sql"
     schema:
       - "infrastructure/migrations/migrations/*.sql"
     gen:
       go:
         package: "sqlc"
-        out: "internal/adapters/postgres-service-repository/tables"
+        out: "internal/adapters/postgres-service-repository/users/tables"
         emit_json_tags: true
         emit_interface: false
         emit_exact_table_names: false
