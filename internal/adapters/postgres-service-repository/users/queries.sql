@@ -6,3 +6,6 @@ WHERE
 
 -- name: CreateUser :one
 INSERT INTO users (username, email) VALUES ($1, $2) RETURNING id, username, email;
+
+-- name: GetUser :one
+SELECT id, username, email FROM users WHERE id = $1;

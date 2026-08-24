@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
 
@@ -94,6 +95,35 @@ func CreateUser(api ports.ApiPort) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusCreated)
+		render.JSON(w, r, responses.UserDomainToUserResponse(user))
+	}
+}
+
+// @Summary      Get a user by ID
+// @Description  Retrieves a user by their ID
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string  true  "User ID"
+// @Success      200  {object}  responses.UserResponse
+// @Failure      404  {object}  handlers.ErrorResponse
+// @Failure      500  {object}  handlers.ErrorResponse
+// @Router       /v1/users/{id} [get]
+func GetUser(api ports.ApiPort) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		user, err := api.GetUserByID(id)
+		if err != nil {
+			if errors.Is(err, applicationerrors.ErrNotFound) {
+				w.WriteHeader(http.StatusNotFound)
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, responses.UserDomainToUserResponse(user))
 	}
 }

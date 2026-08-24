@@ -1,0 +1,1 @@
+TRUNCATE testing.users RESTART IDENTITY;

@@ -1,4 +1,4 @@
-package repository
+package users
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/lib/pq"
 
 	"github.com/diogorodriguesc/boilerplate-go/infrastructure/storage"
-	sqlc "github.com/diogorodriguesc/boilerplate-go/internal/adapters/postgres-service-repository/tables"
+	sqlc "github.com/diogorodriguesc/boilerplate-go/internal/adapters/postgres-service-repository/users/tables"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/domain"
 	applicationerrors "github.com/diogorodriguesc/boilerplate-go/internal/application/errors"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/ports"
@@ -16,19 +16,19 @@ import (
 
 const pqUniqueViolationCode = "23505"
 
-type ServiceRepository struct {
+type Repository struct {
 	DB      *storage.DB
 	queries *sqlc.Queries
 }
 
-func NewServiceRepository(db *storage.DB, queries *sqlc.Queries) ports.ServiceRepository {
-	return &ServiceRepository{
+func New(db *storage.DB, queries *sqlc.Queries) ports.UserRepository {
+	return &Repository{
 		DB:      db,
 		queries: queries,
 	}
 }
 
-func (s *ServiceRepository) SearchUsers(ctx context.Context, filters ports.SearchUserPayload) ([]domain.UserDomain, error) {
+func (s *Repository) SearchUsers(ctx context.Context, filters ports.SearchUserPayload) ([]domain.UserDomain, error) {
 	users, err := s.queries.SearchUsers(ctx, sqlc.SearchUsersParams{
 		Email:    sql.NullString{String: filters.Email, Valid: filters.Email != ""},
 		Username: sql.NullString{String: filters.Username, Valid: filters.Username != ""},
@@ -49,7 +49,7 @@ func (s *ServiceRepository) SearchUsers(ctx context.Context, filters ports.Searc
 	return results, nil
 }
 
-func (s *ServiceRepository) CreateUser(ctx context.Context, username, email string) (*domain.UserDomain, error) {
+func (s *Repository) CreateUser(ctx context.Context, username, email string) (*domain.UserDomain, error) {
 	user, err := s.queries.CreateUser(ctx, sqlc.CreateUserParams{
 		Username: username,
 		Email:    email,
@@ -58,6 +58,22 @@ func (s *ServiceRepository) CreateUser(ctx context.Context, username, email stri
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) && pqErr.Code == pqUniqueViolationCode {
 			return nil, applicationerrors.ErrDuplicateEntry
+		}
+		return nil, err
+	}
+
+	return &domain.UserDomain{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+	}, nil
+}
+
+func (s *Repository) GetUserByID(ctx context.Context, id int64) (*domain.UserDomain, error) {
+	user, err := s.queries.GetUser(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, applicationerrors.ErrNotFound
 		}
 		return nil, err
 	}

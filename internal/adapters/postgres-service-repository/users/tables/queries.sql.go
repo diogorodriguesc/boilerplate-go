@@ -32,6 +32,23 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 	return i, err
 }
 
+const getUser = `-- name: GetUser :one
+SELECT id, username, email FROM users WHERE id = $1
+`
+
+type GetUserRow struct {
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+func (q *Queries) GetUser(ctx context.Context, id int64) (GetUserRow, error) {
+	row := q.db.QueryRowContext(ctx, getUser, id)
+	var i GetUserRow
+	err := row.Scan(&i.ID, &i.Username, &i.Email)
+	return i, err
+}
+
 const searchUsers = `-- name: SearchUsers :many
 SELECT id, username, email FROM users
 WHERE 

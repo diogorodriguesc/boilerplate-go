@@ -3,6 +3,6 @@ package errors
 import "errors"
 
 var (
-	ErrRecordNotFound = errors.New("record not found")
+	ErrNotFound       = errors.New("record not found")
 	ErrDuplicateEntry = errors.New("record already exists")
 )

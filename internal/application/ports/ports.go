@@ -16,6 +16,7 @@ type (
 	ApiPort interface {
 		SearchUsers(payload SearchUserPayload) ([]domain.UserDomain, error)
 		CreateUser(username, email string) (*domain.UserDomain, error)
+		GetUserByID(id string) (*domain.UserDomain, error)
 	}
 
 	HttpService interface {
@@ -24,8 +25,9 @@ type (
 		SetRouter() *chi.Mux
 	}
 
-	ServiceRepository interface {
+	UserRepository interface {
 		SearchUsers(ctx context.Context, filters SearchUserPayload) ([]domain.UserDomain, error)
 		CreateUser(ctx context.Context, username, email string) (*domain.UserDomain, error)
+		GetUserByID(ctx context.Context, id int64) (*domain.UserDomain, error)
 	}
 )

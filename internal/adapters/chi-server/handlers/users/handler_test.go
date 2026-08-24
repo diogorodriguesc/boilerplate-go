@@ -41,7 +41,7 @@ func seedUsers(t *testing.T) {
 
 func fixtureAbsPath(relative string) string {
 	_, currentFile, _, _ := runtime.Caller(0)
-	testdataDir := filepath.Clean(filepath.Join(filepath.Dir(currentFile), "..", "..", "testdata"))
+	testdataDir := filepath.Clean(filepath.Join(filepath.Dir(currentFile), "testdata"))
 	return filepath.Join(testdataDir, relative)
 }
 
@@ -80,6 +80,46 @@ func performCreateUserRequest(t *testing.T, body string) *httptest.ResponseRecor
 	recorder := httptest.NewRecorder()
 	httpServer.SetRouter().ServeHTTP(recorder, req)
 	return recorder
+}
+
+func performGetUserRequest(t *testing.T, id string) *httptest.ResponseRecorder {
+	t.Helper()
+
+	req := httptest.NewRequest(http.MethodGet, "/v1/users/"+id, nil)
+
+	application, _, err := api.NewApplication(t.Context(), env.Storage)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	httpServer := chiserver.NewHttpServer(t.Context(), application)
+
+	recorder := httptest.NewRecorder()
+	httpServer.SetRouter().ServeHTTP(recorder, req)
+	return recorder
+}
+
+func TestHandler_Functional_GetUser(t *testing.T) {
+	seedUsers(t)
+	recorder := performGetUserRequest(t, "1")
+	require.Equal(t, http.StatusOK, recorder.Code)
+	require.JSONEq(t, `{
+	"id": 1,
+	"username": "foo",
+	"email": "foo@gmail.com"
+	}`, recorder.Body.String())
+}
+
+func TestHandler_Functional_GetUser_NotFound(t *testing.T) {
+	seedUsers(t)
+	recorder := performGetUserRequest(t, "999")
+	require.Equal(t, http.StatusNotFound, recorder.Code)
+}
+
+func TestHandler_Functional_GetUser_InvalidID(t *testing.T) {
+	seedUsers(t)
+	recorder := performGetUserRequest(t, "not-a-number")
+	require.Equal(t, http.StatusNotFound, recorder.Code)
 }
 
 func TestHandler_Functional_SearchUser(t *testing.T) {
