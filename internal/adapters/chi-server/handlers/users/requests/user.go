@@ -9,3 +9,8 @@ type SearchUserRequest struct {
 	Username string `json:"username" validate:"omitempty,min=3,max=255"`
 	Email    string `json:"email" validate:"omitempty,email,max=255"`
 }
+
+type ListUsersRequest struct {
+	Page     int `validate:"min=1"`
+	PageSize int `validate:"min=1,max=100"`
+}

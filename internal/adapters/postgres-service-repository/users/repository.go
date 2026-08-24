@@ -84,3 +84,41 @@ func (s *Repository) GetUserByID(ctx context.Context, id int64) (*domain.UserDom
 		Email:    user.Email,
 	}, nil
 }
+
+func (s *Repository) ListUsers(ctx context.Context, limit, offset int32) ([]domain.UserDomain, error) {
+	users, err := s.queries.ListUsers(ctx, sqlc.ListUsersParams{
+		Limit:  limit,
+		Offset: offset,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]domain.UserDomain, 0, len(users))
+	for _, user := range users {
+		results = append(results, domain.UserDomain{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		})
+	}
+
+	return results, nil
+}
+
+func (s *Repository) CountUsers(ctx context.Context) (int64, error) {
+	return s.queries.CountUsers(ctx)
+}
+
+func (s *Repository) DeleteUser(ctx context.Context, id int64) error {
+	rowsAffected, err := s.queries.DeleteUser(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return applicationerrors.ErrNotFound
+	}
+
+	return nil
+}

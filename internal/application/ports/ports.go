@@ -17,6 +17,8 @@ type (
 		SearchUsers(payload SearchUserPayload) ([]domain.UserDomain, error)
 		CreateUser(username, email string) (*domain.UserDomain, error)
 		GetUserByID(id string) (*domain.UserDomain, error)
+		ListUsers(page, pageSize int) ([]domain.UserDomain, int64, error)
+		DeleteUser(id string) error
 	}
 
 	HttpService interface {
@@ -29,5 +31,8 @@ type (
 		SearchUsers(ctx context.Context, filters SearchUserPayload) ([]domain.UserDomain, error)
 		CreateUser(ctx context.Context, username, email string) (*domain.UserDomain, error)
 		GetUserByID(ctx context.Context, id int64) (*domain.UserDomain, error)
+		ListUsers(ctx context.Context, limit, offset int32) ([]domain.UserDomain, error)
+		CountUsers(ctx context.Context) (int64, error)
+		DeleteUser(ctx context.Context, id int64) error
 	}
 )

@@ -53,3 +53,28 @@ func (a *Api) GetUserByID(id string) (*domain.UserDomain, error) {
 
 	return user, nil
 }
+
+func (a *Api) DeleteUser(id string) error {
+	parsedID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return applicationerrors.ErrNotFound
+	}
+
+	return a.userRepository.DeleteUser(context.Background(), parsedID)
+}
+
+func (a *Api) ListUsers(page, pageSize int) ([]domain.UserDomain, int64, error) {
+	offset := (page - 1) * pageSize
+
+	users, err := a.userRepository.ListUsers(context.Background(), int32(pageSize), int32(offset))
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := a.userRepository.CountUsers(context.Background())
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return users, total, nil
+}

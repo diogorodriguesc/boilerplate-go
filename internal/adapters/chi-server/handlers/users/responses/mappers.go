@@ -18,3 +18,12 @@ func UserDomainCollectionToUserResponseCollection(users []domain.UserDomain) []U
 
 	return responseList
 }
+
+func UserDomainCollectionToListUsersResponse(users []domain.UserDomain, page, pageSize int, total int64) ListUsersResponse {
+	return ListUsersResponse{
+		Data:     UserDomainCollectionToUserResponseCollection(users),
+		Page:     page,
+		PageSize: pageSize,
+		Total:    total,
+	}
+}

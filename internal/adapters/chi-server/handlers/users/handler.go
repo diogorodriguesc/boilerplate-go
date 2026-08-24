@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
@@ -14,6 +15,11 @@ import (
 	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/handlers/users/responses"
 	applicationerrors "github.com/diogorodriguesc/boilerplate-go/internal/application/errors"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/ports"
+)
+
+const (
+	defaultPage     = 1
+	defaultPageSize = 20
 )
 
 var validate = validator.New()
@@ -125,5 +131,88 @@ func GetUser(api ports.ApiPort) http.HandlerFunc {
 
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, responses.UserDomainToUserResponse(user))
+	}
+}
+
+// @Summary      Delete a user by ID
+// @Description  Deletes a user by their ID
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id   path  string  true  "User ID"
+// @Success      204
+// @Failure      404  {object}  handlers.ErrorResponse
+// @Failure      500  {object}  handlers.ErrorResponse
+// @Router       /v1/users/{id} [delete]
+func DeleteUser(api ports.ApiPort) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		if err := api.DeleteUser(id); err != nil {
+			if errors.Is(err, applicationerrors.ErrNotFound) {
+				w.WriteHeader(http.StatusNotFound)
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+// @Summary      List users
+// @Description  Retrieves a paginated list of users
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        page      query     int  false  "Page number"       default(1)
+// @Param        pageSize  query     int  false  "Items per page"    default(20)
+// @Success      200  {object}  responses.ListUsersResponse
+// @Failure      400  {object}  handlers.ErrorResponse
+// @Failure      500  {object}  handlers.ErrorResponse
+// @Router       /v1/users [get]
+func ListUsers(api ports.ApiPort) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		req := requests.ListUsersRequest{
+			Page:     defaultPage,
+			PageSize: defaultPageSize,
+		}
+
+		if page := r.URL.Query().Get("page"); page != "" {
+			parsedPage, err := strconv.Atoi(page)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				render.JSON(w, r, handlers.MapErrorIntoErrorResponse(errors.New("page must be an integer")))
+				return
+			}
+			req.Page = parsedPage
+		}
+
+		if pageSize := r.URL.Query().Get("pageSize"); pageSize != "" {
+			parsedPageSize, err := strconv.Atoi(pageSize)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				render.JSON(w, r, handlers.MapErrorIntoErrorResponse(errors.New("pageSize must be an integer")))
+				return
+			}
+			req.PageSize = parsedPageSize
+		}
+
+		if err := validate.Struct(req); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
+			return
+		}
+
+		users, total, err := api.ListUsers(req.Page, req.PageSize)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		render.JSON(w, r, responses.UserDomainCollectionToListUsersResponse(users, req.Page, req.PageSize, total))
 	}
 }
