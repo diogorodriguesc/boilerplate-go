@@ -13,7 +13,7 @@ import (
 	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/handlers"
 	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/handlers/users/requests"
 	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/handlers/users/responses"
-	applicationerrors "github.com/diogorodriguesc/boilerplate-go/internal/application/errors"
+	"github.com/diogorodriguesc/boilerplate-go/internal/adapters/chi-server/middlewares"
 	"github.com/diogorodriguesc/boilerplate-go/internal/application/ports"
 )
 
@@ -74,34 +74,29 @@ func SearchUsers(api ports.ApiPort) http.HandlerFunc {
 // @Failure      409   {object}  handlers.ErrorResponse
 // @Failure      500   {object}  handlers.ErrorResponse
 // @Router       /v1/users [post]
-func CreateUser(api ports.ApiPort) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func CreateUser(api ports.ApiPort) middlewares.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) error {
 		var req requests.CreateUserRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
-			return
+			return nil
 		}
 
 		if err := validate.Struct(req); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
-			return
+			return nil
 		}
 
 		user, err := api.CreateUser(req.Username, req.Email)
 		if err != nil {
-			if errors.Is(err, applicationerrors.ErrDuplicateEntry) {
-				w.WriteHeader(http.StatusConflict)
-			} else {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
-			return
+			return err
 		}
 
 		w.WriteHeader(http.StatusCreated)
 		render.JSON(w, r, responses.UserDomainToUserResponse(user))
+		return nil
 	}
 }
 
@@ -115,22 +110,17 @@ func CreateUser(api ports.ApiPort) http.HandlerFunc {
 // @Failure      404  {object}  handlers.ErrorResponse
 // @Failure      500  {object}  handlers.ErrorResponse
 // @Router       /v1/users/{id} [get]
-func GetUser(api ports.ApiPort) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func GetUser(api ports.ApiPort) middlewares.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) error {
 		id := chi.URLParam(r, "id")
 		user, err := api.GetUserByID(id)
 		if err != nil {
-			if errors.Is(err, applicationerrors.ErrNotFound) {
-				w.WriteHeader(http.StatusNotFound)
-			} else {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
-			return
+			return err
 		}
 
 		w.WriteHeader(http.StatusOK)
 		render.JSON(w, r, responses.UserDomainToUserResponse(user))
+		return nil
 	}
 }
 
@@ -144,20 +134,15 @@ func GetUser(api ports.ApiPort) http.HandlerFunc {
 // @Failure      404  {object}  handlers.ErrorResponse
 // @Failure      500  {object}  handlers.ErrorResponse
 // @Router       /v1/users/{id} [delete]
-func DeleteUser(api ports.ApiPort) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func DeleteUser(api ports.ApiPort) middlewares.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) error {
 		id := chi.URLParam(r, "id")
 		if err := api.DeleteUser(id); err != nil {
-			if errors.Is(err, applicationerrors.ErrNotFound) {
-				w.WriteHeader(http.StatusNotFound)
-			} else {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			render.JSON(w, r, handlers.MapErrorIntoErrorResponse(err))
-			return
+			return err
 		}
 
 		w.WriteHeader(http.StatusNoContent)
+		return nil
 	}
 }
 
