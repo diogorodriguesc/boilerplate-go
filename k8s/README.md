@@ -19,50 +19,53 @@ Start minikube docker container:
 
 First time: 
 ```bash
-minikube start --cpus 4 --memory 8192 --driver=kvm2 \
-  --mount \
-  --mount-string="$MINIKUBE_PROJECTS_PATH:/app"
+make minikube/start-first-time
 ```
 
 Onwards: 
 ```bash
-minikube start
+make minikube/start
 ```
 
 Stop Minikube:
 ```bash
-minikube stop
+make minikube/stop
 ```
 
 ## Creating Docker image
 
 Create docker image:
 ```bash
-docker build -t micro-app-boilerplate-go:dev -f Dockerfile.dev .
+make docker/build
 ```
 
 Load created docker image into minikube
 ```bash
-minikube image load micro-app-boilerplate-go:dev
+make docker/load
 ```
 
 ## Applying infrastructure
 
 Apply Resources:
 ```bash
-kubectl apply -k k8s/base/
+make apply
 ```
 
 Any change you make to kubernetes resources must be applied.
 
 Delete Resources:
 ```bash
-kubectl delete -k k8s/base/
+make delete
 ```
 
 ## Application DB Migrations
 
 Run database migrations:
 ```bash
-kubectl exec -i deployment/micro-app-boilerplate-go -- go run ./cmd/main.go run-db-migrations
+make db/migrate
+```
+
+To get all commands available:
+```bash
+make help
 ```

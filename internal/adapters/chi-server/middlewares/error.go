@@ -72,7 +72,7 @@ func SetErrorMiddleware() func(http.Handler) http.Handler {
 				render.JSON(recorder, r, handlers.MapErrorIntoErrorResponse(handlerErr))
 			}
 
-			if recorder.statusCode < http.StatusBadRequest || recorder.statusCode == http.StatusNotFound{
+			if recorder.statusCode < http.StatusBadRequest || recorder.statusCode == http.StatusNotFound {
 				return
 			}
 
