@@ -29,13 +29,14 @@ func (s *HttpServer) SetRouter() *chi.Mux {
 	r.Route("/v1", func(r chi.Router) {
 		r.Use(middleware.Logger)
 		r.Use(middlewares.SetJSONResponseMiddleware())
+		r.Use(middlewares.SetErrorMiddleware())
 
 		// Users resources
-		r.Get("/users/{id}", usersHandler.GetUser(s.api))
-		r.Delete("/users/{id}", usersHandler.DeleteUser(s.api))
+		r.Get("/users/{id}", usersHandler.GetUser(s.api).ServeHTTP)
+		r.Delete("/users/{id}", usersHandler.DeleteUser(s.api).ServeHTTP)
 		r.Get("/users", usersHandler.ListUsers(s.api))
 		r.Post("/users/search", usersHandler.SearchUsers(s.api))
-		r.Post("/users", usersHandler.CreateUser(s.api))
+		r.Post("/users", usersHandler.CreateUser(s.api).ServeHTTP)
 	})
 
 	return r

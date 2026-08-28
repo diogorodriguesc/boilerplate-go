@@ -25,7 +25,6 @@ install/dependencies: ## Download dependencies
 	@echo "Dependencies downloaded successfully!"
 
 install/sqlc: ## Install sqlc
-	@echo "Installing sqlc..."
 	@set -e; \
 	current=""; \
 	if [ -x "$(SQLC_BIN)" ]; then \
@@ -63,7 +62,6 @@ install/tools: ## Install required tools (goose)
 	@echo "Tools installed successfully!"
 
 install/golangci-lint: ## Install golangci-lint
-	@echo "Installing golangci-lint..."
 	@set -e; \
 	current=""; \
 	if [ -x "$(GOLANGCI_LINT_BIN)" ]; then \
