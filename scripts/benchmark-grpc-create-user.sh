@@ -32,7 +32,7 @@ if [ ! -x "$GHZ_BIN" ]; then
   fi
 fi
 
-ADDR="${ADDR:-localhost:9090}"
+ADDR=$(minikube ip):30090
 TOTAL="${TOTAL:-1000}"
 CONCURRENCY="${CONCURRENCY:-50}"
 CONNECTIONS="${CONNECTIONS:-1}"

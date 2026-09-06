@@ -48,7 +48,7 @@ if [ ! -x "$VEGETA_BIN" ]; then
   fi
 fi
 
-ADDR="${ADDR:-localhost:8080}"
+ADDR=$(minikube ip):30080
 TOTAL="${TOTAL:-1000}"
 CONCURRENCY="${CONCURRENCY:-50}"
 DURATION="${DURATION:-}"
