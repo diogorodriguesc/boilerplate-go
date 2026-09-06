@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	_ "github.com/diogorodriguesc/boilerplate-go/docs"
@@ -27,7 +26,7 @@ func (s *HttpServer) SetRouter() *chi.Mux {
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	r.Route("/v1", func(r chi.Router) {
-		r.Use(middleware.Logger)
+		r.Use(middlewares.RequestLoggerMiddleware())
 		r.Use(middlewares.SetJSONResponseMiddleware())
 
 		// Users resources

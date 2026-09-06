@@ -60,9 +60,25 @@ Delete Resources:
 kubectl delete -k k8s/base/
 ```
 
+The app runs as two separate Deployments/Services, sharing the same image but
+each running a single entrypoint command:
+
+- `micro-app-boilerplate-go-http` / `go-http-k8s-service` — runs `http-server`,
+  exposed on port 8080 (nodePort 30080).
+- `micro-app-boilerplate-go-grpc` / `go-grpc-k8s-service` — runs `grpc-server`,
+  exposed on port 9090 (nodePort 30090).
+
+Port-forward either one to your machine:
+```bash
+kubectl port-forward svc/go-http-k8s-service 8085:8080
+kubectl port-forward svc/go-grpc-k8s-service 9095:9090
+```
+(or `make -C k8s port-forward/http` / `make -C k8s port-forward/grpc`)
+
 ## Application DB Migrations
 
-Run database migrations:
+Run database migrations (either deployment works — they share the same
+database, this just uses the HTTP one):
 ```bash
-kubectl exec -i deployment/micro-app-boilerplate-go -- go run ./cmd/main.go run-db-migrations
+kubectl exec -i deployment/micro-app-boilerplate-go-http -- go run ./cmd/main.go run-db-migrations
 ```
