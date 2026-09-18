@@ -1,13 +1,17 @@
-.PHONY: help manage/dev-environment install/sqlc generate/sqlc install/dependencies install/tools install/golangci-lint lint tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build
+.PHONY: help manage/dev-environment install/sqlc generate/sqlc install/dependencies install/tools install/golangci-lint lint tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build install/protoc-gen-go install/protoc-gen-go-grpc generate/proto pre-commit-check
 
 SQLC_VERSION ?= v1.31.1
 SWAGGER_VERSION ?= v1.16.6
 GOLANGCI_LINT_VERSION ?= v1.64.2
+PROTOC_GEN_GO_VERSION ?= v1.36.12
+PROTOC_GEN_GO_GRPC_VERSION ?= v1.6.2
 
 TOOLS_BIN ?= $(CURDIR)/.bin
 SQLC_BIN ?= $(TOOLS_BIN)/sqlc
 SWAGGER_BIN ?= $(TOOLS_BIN)/swag
 GOLANGCI_LINT_BIN ?= $(TOOLS_BIN)/golangci-lint
+PROTOC_GEN_GO_BIN ?= $(TOOLS_BIN)/protoc-gen-go
+PROTOC_GEN_GO_GRPC_BIN ?= $(TOOLS_BIN)/protoc-gen-go-grpc
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -57,6 +61,27 @@ generate/swagger: ## Generate Swagger documentation
 	@$(SWAGGER_BIN) init -g internal/adapters/chi-server/router.go -o docs
 	@echo "Swagger documentation generated successfully!"
 
+install/protoc-gen-go: ## Install protoc-gen-go
+	@echo "Installing protoc-gen-go $(PROTOC_GEN_GO_VERSION)..."
+	@mkdir -p $(TOOLS_BIN)
+	@GOBIN="$(TOOLS_BIN)" go install google.golang.org/protobuf/cmd/protoc-gen-go@$(PROTOC_GEN_GO_VERSION)
+	@echo "protoc-gen-go $(PROTOC_GEN_GO_VERSION) installed successfully!"
+
+install/protoc-gen-go-grpc: ## Install protoc-gen-go-grpc
+	@echo "Installing protoc-gen-go-grpc $(PROTOC_GEN_GO_GRPC_VERSION)..."
+	@mkdir -p $(TOOLS_BIN)
+	@GOBIN="$(TOOLS_BIN)" go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@$(PROTOC_GEN_GO_GRPC_VERSION)
+	@echo "protoc-gen-go-grpc $(PROTOC_GEN_GO_GRPC_VERSION) installed successfully!"
+
+generate/proto: install/protoc-gen-go install/protoc-gen-go-grpc ## Generate Go code from all .proto files under proto/ (requires protoc: https://github.com/protocolbuffers/protobuf/releases)
+	@echo "Generating code from proto files..."
+	@PATH="$(TOOLS_BIN):$$PATH" protoc \
+		--go_out=. --go_opt=module=github.com/diogorodriguesc/boilerplate-go \
+		--go-grpc_out=. --go-grpc_opt=module=github.com/diogorodriguesc/boilerplate-go \
+		-I proto \
+		$$(find proto -name '*.proto')
+	@echo "Proto code generated successfully!"
+
 install/tools: ## Install required tools (goose)
 	@echo "Installing goose..."
 	@go install github.com/pressly/goose/v3/cmd/goose@latest
@@ -90,6 +115,13 @@ tests/unit-tests: ## Run unit tests
 tests/functional-tests: ## Run functional tests
 	@echo "Running functional tests..."
 	@go test -tags=functional -v ./...
+
+pre-commit-check: ## Run pre-commit checks (lint, unit tests, functional tests)
+	@echo "Running pre-commit checks..."
+	@make lint
+	@make tests/unit-tests
+	@make tests/functional-tests
+	@echo "Pre-commit checks completed successfully!"
 
 tests/coverage-view: ## Get code coverage
 	@echo "Running tests and checking coverage"

@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: micro-app-boilerplate-go
+  name: micro-app-boilerplate-go-http
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: micro-app-boilerplate-go
+      app: micro-app-boilerplate-go-http
   template:
     metadata:
       labels:
-        app: micro-app-boilerplate-go
+        app: micro-app-boilerplate-go-http
     spec:
       # initContainers: # For running database migrations before starting the main application
         # - name: run-migrations
@@ -23,17 +23,22 @@ spec:
         #    - name: local-data
         #      mountPath: /app/boilerplate-go
       containers:
-        - name: micro-app-boilerplate-go
+        - name: http-server
           image: micro-app-boilerplate-go:dev
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
+          # `go run` compiles the whole binary (including grpc/protobuf, which
+          # http-server doesn't even need at runtime but cmd/main.go imports
+          # both subcommands) from a cold, unpersisted build cache on every
+          # container start. That takes well over a minute on the minikube
+          # VM, so the startup probe budget must comfortably exceed it.
           startupProbe:
             httpGet:
               path: /health
               port: 8080
-            periodSeconds: 2
-            failureThreshold: 30
+            periodSeconds: 3
+            failureThreshold: 80
           readinessProbe:
             httpGet:
               path: /health
@@ -49,6 +54,8 @@ spec:
           volumeMounts:
             - name: local-data
               mountPath: /app/boilerplate-go
+            - name: go-build-cache
+              mountPath: /root/.cache/go-build
           workingDir: /app/boilerplate-go
           command: ["go"]
           args: ["run", "cmd/main.go", "http-server"]
@@ -57,3 +64,8 @@ spec:
           hostPath:
             path: /app/boilerplate-go
             type: Directory
+        # Persists the Go build cache across container restarts (crash loops,
+        # OOM kills, etc.) so only the very first start pays the full cold
+        # compile cost instead of every single restart.
+        - name: go-build-cache
+          emptyDir: {}

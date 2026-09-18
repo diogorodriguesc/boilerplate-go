@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package users.v1;
+
+option go_package = "github.com/diogorodriguesc/boilerplate-go/internal/adapters/grpc-server/gen/users/v1;usersv1";
+
+message User {
+  int64 id = 1;
+  string username = 2;
+  string email = 3;
+}
+
+message CreateUserRequest {
+  string username = 1;
+  string email = 2;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+service UsersService {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+}

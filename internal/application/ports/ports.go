@@ -3,8 +3,9 @@ package ports
 import (
 	"context"
 
-	"github.com/diogorodriguesc/boilerplate-go/internal/application/domain"
 	"github.com/go-chi/chi/v5"
+
+	"github.com/diogorodriguesc/boilerplate-go/internal/application/domain"
 )
 
 type (
@@ -25,6 +26,11 @@ type (
 		Run() error
 		Shutdown(ctx context.Context) error
 		SetRouter() *chi.Mux
+	}
+
+	GrpcService interface {
+		Run() error
+		Shutdown(ctx context.Context) error
 	}
 
 	UserRepository interface {
