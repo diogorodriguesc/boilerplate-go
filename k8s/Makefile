@@ -55,7 +55,7 @@ docker/load: ## Load the development Docker image into Minikube
 	@echo "Loading $(IMAGE) into Minikube..."
 	@minikube image load $(IMAGE)
 
-apply: ## Apply Kubernetes resources, wait for both rollouts, then port-forward the HTTP service to localhost:8085
+apply: ## Apply Kubernetes resources, wait for both rollouts
 	@echo "Applying Kubernetes resources..."
 	@kubectl apply -k $(K8S_BASE)
 	@kubectl rollout status $(HTTP_DEPLOYMENT)

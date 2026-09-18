@@ -1,4 +1,4 @@
-.PHONY: help manage/dev-environment install/sqlc generate/sqlc install/dependencies install/tools install/golangci-lint lint tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build install/protoc-gen-go install/protoc-gen-go-grpc generate/proto
+.PHONY: help manage/dev-environment install/sqlc generate/sqlc install/dependencies install/tools install/golangci-lint lint tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build install/protoc-gen-go install/protoc-gen-go-grpc generate/proto pre-commit-check
 
 SQLC_VERSION ?= v1.31.1
 SWAGGER_VERSION ?= v1.16.6
@@ -115,6 +115,13 @@ tests/unit-tests: ## Run unit tests
 tests/functional-tests: ## Run functional tests
 	@echo "Running functional tests..."
 	@go test -tags=functional -v ./...
+
+pre-commit-check: ## Run pre-commit checks (lint, unit tests, functional tests)
+	@echo "Running pre-commit checks..."
+	@make lint
+	@make tests/unit-tests
+	@make tests/functional-tests
+	@echo "Pre-commit checks completed successfully!"
 
 tests/coverage-view: ## Get code coverage
 	@echo "Running tests and checking coverage"

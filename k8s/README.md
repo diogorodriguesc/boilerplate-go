@@ -50,14 +50,14 @@ minikube image load micro-app-boilerplate-go:dev
 
 Apply Resources:
 ```bash
-kubectl apply -k k8s/base/
+make apply
 ```
 
 Any change you make to kubernetes resources must be applied.
 
 Delete Resources:
 ```bash
-kubectl delete -k k8s/base/
+make delete
 ```
 
 The app runs as two separate Deployments/Services, sharing the same image but
@@ -97,5 +97,5 @@ port-forward numbers should not be trusted as the server's real capacity.
 Run database migrations (either deployment works — they share the same
 database, this just uses the HTTP one):
 ```bash
-kubectl exec -i deployment/micro-app-boilerplate-go-http -- go run ./cmd/main.go run-db-migrations
+make db/migrate
 ```
