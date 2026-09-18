@@ -1,12 +1,10 @@
-.PHONY: help manage/dev-environment install/sqlc generate/sqlc install/dependencies install/tools install/golangci-lint lint tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build install/protoc-gen-go install/protoc-gen-go-grpc generate/proto install/ghz benchmark/grpc-create-user install/vegeta benchmark/http-create-user
+.PHONY: help manage/dev-environment install/sqlc generate/sqlc install/dependencies install/tools install/golangci-lint lint tests/unit-tests tests/functional-tests tests/coverage-view tests/coverage-analyze build install/protoc-gen-go install/protoc-gen-go-grpc generate/proto
 
 SQLC_VERSION ?= v1.31.1
 SWAGGER_VERSION ?= v1.16.6
 GOLANGCI_LINT_VERSION ?= v1.64.2
 PROTOC_GEN_GO_VERSION ?= v1.36.12
 PROTOC_GEN_GO_GRPC_VERSION ?= v1.6.2
-GHZ_VERSION ?= v0.121.0
-VEGETA_VERSION ?= v12.7.0
 
 TOOLS_BIN ?= $(CURDIR)/.bin
 SQLC_BIN ?= $(TOOLS_BIN)/sqlc
@@ -14,8 +12,6 @@ SWAGGER_BIN ?= $(TOOLS_BIN)/swag
 GOLANGCI_LINT_BIN ?= $(TOOLS_BIN)/golangci-lint
 PROTOC_GEN_GO_BIN ?= $(TOOLS_BIN)/protoc-gen-go
 PROTOC_GEN_GO_GRPC_BIN ?= $(TOOLS_BIN)/protoc-gen-go-grpc
-GHZ_BIN ?= $(TOOLS_BIN)/ghz
-VEGETA_BIN ?= $(TOOLS_BIN)/vegeta
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -129,28 +125,6 @@ tests/coverage-view: ## Get code coverage
 tests/coverage-analyze: ## Analyze code coverage
 	@go test -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out
-
-install/ghz: ## Install ghz (gRPC benchmarking tool)
-	@if [ ! -x "$(GHZ_BIN)" ]; then \
-		echo "Installing ghz $(GHZ_VERSION)..."; \
-		mkdir -p $(TOOLS_BIN); \
-		GOBIN="$(TOOLS_BIN)" go install github.com/bojand/ghz/cmd/ghz@$(GHZ_VERSION); \
-		echo "ghz $(GHZ_VERSION) installed successfully!"; \
-	fi
-
-benchmark/grpc-create-user: install/ghz ## Benchmark the gRPC CreateUser entrypoint (override ADDR/TOTAL/CONCURRENCY/DURATION as env vars)
-	@GHZ_BIN=$(GHZ_BIN) ./scripts/benchmark-grpc-create-user.sh
-
-install/vegeta: ## Install vegeta (HTTP benchmarking tool)
-	@if [ ! -x "$(VEGETA_BIN)" ]; then \
-		echo "Installing vegeta $(VEGETA_VERSION)..."; \
-		mkdir -p $(TOOLS_BIN); \
-		GOBIN="$(TOOLS_BIN)" go install github.com/tsenart/vegeta@$(VEGETA_VERSION); \
-		echo "vegeta $(VEGETA_VERSION) installed successfully!"; \
-	fi
-
-benchmark/http-create-user: install/vegeta ## Benchmark the HTTP CreateUser entrypoint (override ADDR/TOTAL/CONCURRENCY/DURATION/POOL_SIZE as env vars)
-	@VEGETA_BIN=$(VEGETA_BIN) ./scripts/benchmark-http-create-user.sh
 
 build: ## Build the application
 	@echo "Building application..."
